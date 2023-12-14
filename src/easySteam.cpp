@@ -5,11 +5,12 @@ namespace easySteam {
 
     uint64_t appID = 0; // Only used for modifying workshop items
     uint64_t itemID = 0;
-    steam_helper* _steam_helper = nullptr;
+    std::unique_ptr<steam_helper> _steam_helper = nullptr;
     std::optional<UGCUpdateHandle_t> update_handle;
+    bool initUpdateHandleCalled = false;
 
     void initializeSteamHelper() {
-        _steam_helper = new steam_helper;
+        _steam_helper.reset(new steam_helper);
     }
 
     void createItem(uint64_t app_id) {
@@ -35,6 +36,12 @@ namespace easySteam {
 
     void initUpdateHandle()
     {
+        if (initUpdateHandleCalled)
+        {
+            std::cout << "Error : you should call initUpdateHandle only once, before changing your item content.\n";
+            return;
+        }
+
         if (!_steam_helper)
         {
             std::cout << "Steam helper is not initialized.\n";
@@ -59,6 +66,7 @@ namespace easySteam {
     }
 
     void updateItem(uint64_t app_id, uint64_t item_id) {
+        
         _steam_helper->app_id = app_id;
 
         if (easySteam::update_handle.has_value())

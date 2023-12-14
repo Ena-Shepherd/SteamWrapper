@@ -12,7 +12,8 @@ namespace easySteam {
 
     extern uint64_t appID; // Only used for modifying workshop items
     extern uint64_t itemID;
-    extern steam_helper* _steam_helper;
+    extern std::unique_ptr<steam_helper> _steam_helper;
+    extern bool initUpdateHandleCalled;
     std::optional<UGCUpdateHandle_t> getUpdateHandle();
 
     void initializeSteamHelper();
