@@ -1,10 +1,13 @@
 ![1 1_8LbQy3Sx9B_5BfL7f70g](https://clan.akamai.steamstatic.com/images/3284297/b27ff50de898a52d9ea8dbda746c47ec2045bad4_960x311.jpg)
 ## <p align="center">Integrate creating and editing of Steam workshop items for your app in seconds</p>
-## It only takes few lines of code
+## It only takes a few lines of code
 ```cpp
 #include "easySteam.h"
 
+// Do only once
+
 easySteam::initializeSteamHelper();
+
 
 // Specify the app ID to create a new item
 
@@ -15,32 +18,32 @@ easySteam::appID = 480;
 
 easySteam::createItem(easySteam::appID);
 
+
 // Or specify the item ID if you want to edit an existing item
 // easySteam::itemID = 3106420873; 
     
 
 // Customize the workshop item as needed
-
-  easySteam::initUpdateHandle();
+easySteam::initUpdateHandle();
 
 
 // Rest of the API
 
-  easySteam::setPreviewImage("SomePath\\ena.jpg");
-  easySteam::setWorkshopItemTitle("Custom Title");
-  easySteam::setWorkshopItemDescription("Custom Description");
-  easySteam::setWorkshopItemContent("SomePath\\YourContent");
+easySteam::setPreviewImage("SomePath\\ena.jpg");
+easySteam::setWorkshopItemTitle("Custom Title");
+easySteam::setWorkshopItemDescription("Custom Description");
+easySteam::setWorkshopItemContent("SomePath\\YourContent");
 
 
 // Submit your changes
 
-  easySteam::submitWorkshopItemUpdate(easySteam::itemID, "Custom changelog note");
+easySteam::submitWorkshopItemUpdate(easySteam::itemID, "Custom changelog note");
 
 ```
 
 ## No more Async to worry about
 Asynchronous operations are now handled inside the library <br/>
--> Default timeout for operations is 4 minutes
+> Default timeout for operations is 4 minutes
 
 ## Compiling
 - You will need `steamapi_64` added to your project
