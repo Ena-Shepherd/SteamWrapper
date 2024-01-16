@@ -1,4 +1,4 @@
-![1 1_8LbQy3Sx9B_5BfL7f70g](https://github.com/Ena-Shepherd/EasySteamUGC/assets/62568994/4f210b5f-0407-4aa1-986f-7fc6d3eb09b8)
+![1 1_8LbQy3Sx9B_5BfL7f70g](https://clan.akamai.steamstatic.com/images/3284297/b27ff50de898a52d9ea8dbda746c47ec2045bad4_960x311.jpg)
 ## <p align="center">Integrate creating and editing of Steam workshop items for your app in seconds</p>
 ## It only takes few lines of code
 ```cpp
