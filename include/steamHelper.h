@@ -112,7 +112,11 @@ public:
 
     void submit_item_update(const UGCUpdateHandle_t handle, const char* change_note, submit_item_continuation&& continuation) noexcept;
 
+    bool get_item_upload_progress(const UGCUpdateHandle_t update_handle, uint64_t *Processed, uint64_t *Total) noexcept;
+
     bool run_callbacks() noexcept;
+
+    [[nodiscard]] bool unsubscribe_item(PublishedFileId_t item_id) noexcept;
 
     [[nodiscard]] bool initialized() const noexcept;
 

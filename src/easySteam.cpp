@@ -69,70 +69,125 @@ namespace easySteam {
         
         _steam_helper->app_id = app_id;
 
-        if (easySteam::update_handle.has_value())
+        if (!easySteam::update_handle.has_value())
         {
-            UGCUpdateHandle_t handle = easySteam::update_handle.value();
-
-            if (!update_handle.has_value()) {
-                std::cout << "Failure getting update handle\n";
-                return;
-            }
-
-            std::cout << "Update handle obtained successfully.\n";
+            std::cout << "Error : you should call initUpdateHandle before getting the upload progress.\n";
+            return;
         }
+
+        UGCUpdateHandle_t handle = easySteam::update_handle.value();
+
+        if (!update_handle.has_value()) {
+            std::cout << "Failure getting update handle\n";
+            return;
+        }
+
+        std::cout << "Update handle obtained successfully.\n";
     }
 
     void setPreviewImage(const std::filesystem::path& file_path) {
-        if (easySteam::update_handle.has_value())
+        if (!easySteam::update_handle.has_value())
         {
-            UGCUpdateHandle_t handle = easySteam::update_handle.value();
+            std::cout << "Error : you should call initUpdateHandle before getting the upload progress.\n";
+            return;
+        }
 
-            if (!_steam_helper->set_workshop_item_preview_image(handle, file_path))
-            {
-                std::cout << "Failure setting workshop item preview image\n";
-            }
+        UGCUpdateHandle_t handle = easySteam::update_handle.value();
+
+        if (!_steam_helper->set_workshop_item_preview_image(handle, file_path))
+        {
+            std::cout << "Failure setting workshop item preview image\n";
         }
     }
 
     void setWorkshopItemTitle(const std::string& title) {
-        if (easySteam::update_handle.has_value())
+        if (!easySteam::update_handle.has_value())
         {
-            UGCUpdateHandle_t handle = easySteam::update_handle.value();
-            if (!_steam_helper->set_workshop_item_title(handle, title)) {
-                std::cout << "Failure setting workshop item title\n";
-            }
+            std::cout << "Error : you should call initUpdateHandle before getting the upload progress.\n";
+            return;
+        }
+
+        UGCUpdateHandle_t handle = easySteam::update_handle.value();
+        if (!_steam_helper->set_workshop_item_title(handle, title)) {
+            std::cout << "Failure setting workshop item title\n";
         }
     }
 
     void setWorkshopItemDescription(const std::string& description) {
-        if (easySteam::update_handle.has_value())
+        if (!easySteam::update_handle.has_value())
         {
-            UGCUpdateHandle_t handle = easySteam::update_handle.value();
-            if (!_steam_helper->set_workshop_item_description(handle, description)) {
-                std::cout << "Failure setting workshop item description\n";
-            }
+            std::cout << "Error : you should call initUpdateHandle before getting the upload progress.\n";
+            return;
+        }
+
+        UGCUpdateHandle_t handle = easySteam::update_handle.value();
+        if (!_steam_helper->set_workshop_item_description(handle, description)) {
+            std::cout << "Failure setting workshop item description\n";
         }
     }
 
     void setWorkshopItemContent(const std::filesystem::path& directory_path) {
-        if (easySteam::update_handle.has_value())
+        if (!easySteam::update_handle.has_value())
         {
-            UGCUpdateHandle_t handle = easySteam::update_handle.value();
-            if (!_steam_helper->set_workshop_item_content(handle, directory_path)) {
-                std::cout << "Failure setting workshop item content\n";
-            }
+            std::cout << "Error : you should call initUpdateHandle before getting the upload progress.\n";
+            return;
+        }
+
+        UGCUpdateHandle_t handle = easySteam::update_handle.value();
+        if (!_steam_helper->set_workshop_item_content(handle, directory_path)) {
+            std::cout << "Failure setting workshop item content\n";
         }
     }
 
     void submitWorkshopItemUpdate(uint64_t item_id, const std::string& changelog_note) {
-        if (easySteam::update_handle.has_value())
+        if (!easySteam::update_handle.has_value())
         {
-            UGCUpdateHandle_t handle = easySteam::update_handle.value();
-            _steam_helper->submit_item_update(handle,
-                changelog_note.c_str(),
-                [item_id] {
-                    std::cout << "Successfully updated workshop item: " << item_id << ".\n";
-                });
+            std::cout << "Error : you should call initUpdateHandle before getting the upload progress.\n";
+            return;
         }
+
+        UGCUpdateHandle_t handle = easySteam::update_handle.value();
+        _steam_helper->submit_item_update(handle,
+            changelog_note.c_str(),
+            [item_id] {
+                std::cout << "Successfully updated workshop item: " << item_id << ".\n";
+            });
+
     }
+
+    void getWorkshopItemUploadProgress(uint64_t item_id, long* remaining, long* totalSize) {
+        if (!easySteam::update_handle.has_value())
+        {
+            std::cout << "Error : you should call initUpdateHandle before getting the upload progress.\n";
+            return;
+        }
+
+        uint64_t processed = 0, total = 0;
+
+        UGCUpdateHandle_t handle = easySteam::update_handle.value();
+
+        if ( _steam_helper->get_item_upload_progress(handle, &processed, &total) != false) {
+            //std::cout << "Processed : " << processed << " Total : " << total << std::endl;
+        } else {
+            *totalSize = -1;
+            *remaining = -1;
+            return;
+        }
+        *remaining = static_cast<long>(processed);
+        *totalSize = static_cast<long>(total);
+    }
+
+    void unsubscribeWorkshopItem(uint64_t item_id) {
+
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return;
+        }
+
+        if (!_steam_helper->unsubscribe_item(item_id)) {
+            std::cout << "Failed to unsubscribe from workshop item: " << item_id << ".\n";
+        }
+
+    }
+
 } // namespace easySteam

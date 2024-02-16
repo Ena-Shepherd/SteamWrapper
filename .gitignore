@@ -1,2 +1,4 @@
 SteamAPI
 steam_api64.dll
+.vscode
+*.o

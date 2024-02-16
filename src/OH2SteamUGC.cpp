@@ -435,8 +435,7 @@ bool steam_helper::set_workshop_item_preview_image(const UGCUpdateHandle_t updat
     assert(std::filesystem::exists(file_path, ec));
     assert(std::filesystem::is_regular_file(file_path, ec));
 
-    if(!SteamUGC()->SetItemPreview(
-            update_handle, file_path.string().data()))
+    if(!SteamUGC()->SetItemPreview(update_handle, file_path.string().data()))
     {
         log("Steam")
             << "Failed to set workshop item preview image from path '"
@@ -449,7 +448,6 @@ bool steam_helper::set_workshop_item_preview_image(const UGCUpdateHandle_t updat
 }
 
 bool steam_helper::set_workshop_item_title(const UGCUpdateHandle_t update_handle, const std::string title) noexcept {
-    [[maybe_unused]] std::error_code ec;
 
     if(!SteamUGC()->SetItemTitle(update_handle, title.data()))
     {
@@ -470,6 +468,23 @@ void steam_helper::submit_item_update(const UGCUpdateHandle_t handle, const char
 
     _submit_item_result.Set(api_call, this, &steam_helper::on_submit_item);
     _submit_item_continuation = std::move(continuation);
+}
+
+bool steam_helper::get_item_upload_progress(const UGCUpdateHandle_t update_handle, uint64_t *Processed, uint64_t *Total) noexcept {
+
+    if(!SteamUGC()->GetItemUpdateProgress(update_handle, Processed, Total))
+    {
+        log("Steam")
+            << "Failed to get workshop item upload progress" << "'\n";
+        return false;
+    }
+    if (*Processed == *Total && *Total != 0) {
+        log("Steam")
+            << "Workshop item upload complete\n";
+        return false;
+    }
+
+    return true;
 }
 
 bool steam_helper::run_callbacks() noexcept {
@@ -497,5 +512,17 @@ void steam_helper::remove_pending_operation() noexcept {
     _pending_operations.store(_pending_operations.load() - 1);
     log("Steam") << "Removed pending operation\n";
 }
+
+[[nodiscard]] bool steam_helper::unsubscribe_item(PublishedFileId_t item_id) noexcept {
+
+    if (SteamUGC()->UnsubscribeItem(item_id)) {
+        log("Steam") << "Successfully unsubscribed from workshop item.\n";
+        return true;
+    } else {
+        log("Steam") << "Failed to unsubscribe from workshop item.\n";
+        return false;
+    }
+}
+
 
 // ----------------------------------------------------------------------------
