@@ -25,6 +25,6 @@ namespace easySteam {
     void setWorkshopItemDescription(const std::string& description);
     void setWorkshopItemContent(const std::filesystem::path& directory_path);
     void submitWorkshopItemUpdate(uint64_t item_id, const std::string& changelog_note);
-    void getWorkshopItemUploadProgress(uint64_t item_id, long* remaining, long* totalSize);
+    void getWorkshopItemUploadProgress(long* remaining, long* totalSize);
     void unsubscribeWorkshopItem(uint64_t item_id);
 } // namespace easySteam

@@ -75,7 +75,11 @@ namespace easySteam {
             return;
         }
 
-        easySteam::update_handle.value();
+        if (easySteam::update_handle.value() != item_id)
+        {
+            std::cout << "Error : you should call initUpdateHandle with the correct item_id.\n";
+            return;
+        }
 
         if (!update_handle.has_value()) {
             std::cout << "Failure getting update handle\n";
@@ -155,7 +159,7 @@ namespace easySteam {
 
     }
 
-    void getWorkshopItemUploadProgress(uint64_t item_id, long *remaining, long *totalSize) {
+    void getWorkshopItemUploadProgress(long *remaining, long *totalSize) {
         if (!easySteam::update_handle.has_value())
         {
             std::cout << "Error : you should call initUpdateHandle before getting the upload progress.\n";
