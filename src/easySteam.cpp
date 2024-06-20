@@ -75,7 +75,7 @@ namespace easySteam {
             return;
         }
 
-        UGCUpdateHandle_t handle = easySteam::update_handle.value();
+        easySteam::update_handle.value();
 
         if (!update_handle.has_value()) {
             std::cout << "Failure getting update handle\n";
@@ -155,7 +155,7 @@ namespace easySteam {
 
     }
 
-    void getWorkshopItemUploadProgress(uint64_t item_id, long* remaining, long* totalSize) {
+    void getWorkshopItemUploadProgress(uint64_t item_id, long *remaining, long *totalSize) {
         if (!easySteam::update_handle.has_value())
         {
             std::cout << "Error : you should call initUpdateHandle before getting the upload progress.\n";
@@ -169,8 +169,8 @@ namespace easySteam {
         if ( _steam_helper->get_item_upload_progress(handle, &processed, &total) != false) {
             //std::cout << "Processed : " << processed << " Total : " << total << std::endl;
         } else {
-            *totalSize = -1;
-            *remaining = -1;
+            *totalSize = 1;
+            *remaining = 1;
             return;
         }
         *remaining = static_cast<long>(processed);
