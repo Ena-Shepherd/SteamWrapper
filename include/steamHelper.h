@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 // Steam includes.
 #include <inttypes.h> // Steam libs need this.
-#include "../SteamAPI/include/steam_api.h"
+#include "../../SteamAPI/include/steam_api.h"
 
 // ----------------------------------------------------------------------------
 // Standard includes.
