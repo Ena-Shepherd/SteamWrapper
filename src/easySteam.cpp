@@ -1,16 +1,129 @@
 #include "../include/easySteam.h" 
 
-
 namespace easySteam {
 
-    uint64_t appID = 0; // Only used for modifying workshop items
+    uint64_t appID = 0;
     uint64_t itemID = 0;
     std::unique_ptr<steam_helper> _steam_helper = nullptr;
     std::optional<UGCUpdateHandle_t> update_handle;
+    UGCQueryHandle_t queryHandle;
     bool initUpdateHandleCalled = false;
 
     void initializeSteamHelper() {
         _steam_helper.reset(new steam_helper);
+    }
+
+    bool setSearchText(const char* searchText) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return false;
+        }
+        if(queryHandle == 0) {
+            std::cout << "Please create a query first.\n";
+            return false;
+        }
+
+        return _steam_helper->set_search_text(queryHandle, searchText);
+    }
+    
+    /// @brief "User" query creation function.
+    /// @param accountID
+    /// @param listType
+    /// @param matchingType
+    /// @param sortOrder
+    /// @param creatorAppID
+    /// @param consumerAppID
+    /// @param page
+    void createQuery(AccountID_t accountID, EUserUGCList listType, EUGCMatchingUGCType matchingType, EUserUGCListSortOrder sortOrder, AppId_t creatorAppID, AppId_t consumerAppID, uint32_t page) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return;
+        }
+        if (creatorAppID == 0 || consumerAppID == 0) {
+            std::cout << "Please set your app ID.\n";
+            return;
+        }
+
+        _steam_helper->create_user_query(queryHandle, accountID, listType, matchingType, sortOrder, creatorAppID, consumerAppID, page);
+    }
+    
+    /// @brief "All" query creation function.
+    /// @param listType 
+    /// @param matchingType 
+    /// @param creatorAppID 
+    /// @param consumerAppID 
+    /// @param page 
+    void createQuery(EUGCQuery listType, EUGCMatchingUGCType matchingType, AppId_t creatorAppID, AppId_t consumerAppID, uint32_t page) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return;
+        }
+        if (creatorAppID == 0 || consumerAppID == 0) {
+            std::cout << "Please set your app ID.\n";
+            return;
+        }
+
+        _steam_helper->create_all_query(queryHandle, listType, matchingType, creatorAppID, consumerAppID, page);
+    }
+
+    void parseQueryResults(std::vector<std::string>& itemList, std::vector<WorkshopItem_t>& workshopItems) {
+        
+        int it = 1;
+
+        for (const auto& itemInfo : itemList) {
+            // Parse the item info after each third index
+            if (it % 3 == 0) {
+                
+                WorkshopItem_t item;
+                
+                item.title = itemList[it - 3];
+                item.description = itemList[it - 2];
+                item.url = itemList[it - 1];
+
+                workshopItems.push_back(item);
+            }
+
+            it++;
+        }
+    }
+
+    /// @brief Sends the query to the Steam API and returns found items information.
+    /// @note This function should be called after creating a query.
+    std::vector<WorkshopItem_t> sendQuery() {
+
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return {};
+        }
+        if(queryHandle == 0) {
+            std::cout << "Please create a query first.\n";
+            return {};
+        }
+
+        _steam_helper->send_query_request(queryHandle,
+            [&](UGCQueryHandle_t query_handle) {
+                std::cout << "Query went successfully.\n";
+            });
+
+        if (poll_steam_callbacks(*_steam_helper)) {
+            std::cout << "Steam callbacks processed successfully.\n";
+        } else {
+            std::cout << "Error processing Steam callbacks or timed out.\n";
+        }
+
+        std::vector<std::string> itemList;
+        std::vector<WorkshopItem_t> workshopItems;
+
+        _steam_helper->get_query_results(itemList);
+       
+        parseQueryResults(itemList, workshopItems);
+        _steam_helper->release_query_handle(queryHandle);
+
+        if (workshopItems.empty()) {
+            std::cout << "No items found.\n";
+            return {};
+        }
+        return workshopItems;
     }
 
     void createItem(uint64_t app_id) {

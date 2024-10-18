@@ -62,17 +62,27 @@ private:
     // Type aliases.
     using create_item_continuation = std::function<void(PublishedFileId_t)>;
     using submit_item_continuation = std::function<void()>;
+    using submit_query_continuation = std::function<void(UGCQueryHandle_t)>;
+
+    typedef struct query_result {
+        SteamUGCDetails_t item_details;
+        char* image_url;
+    } query_result_t;
 
     // ------------------------------------------------------------------------
     // Data members.
     bool _initialized;
     std::atomic<int> _pending_operations;
+    std::vector<query_result_t> _query_results;
 
     CCallResult<steam_helper, CreateItemResult_t> _create_item_result;
     create_item_continuation _create_item_continuation;
 
     CCallResult<steam_helper, SubmitItemUpdateResult_t> _submit_item_result;
     submit_item_continuation _submit_item_continuation;
+
+    CCallResult<steam_helper, SteamUGCQueryCompleted_t> _submit_query_result;
+    submit_query_continuation _submit_query_continuation;
 
     // ------------------------------------------------------------------------
     // Initialization utils.
@@ -87,7 +97,8 @@ private:
     void on_create_item(CreateItemResult_t* result, bool io_failure);
 
     void on_submit_item(SubmitItemUpdateResult_t* result, bool io_failure);
-    
+
+    void on_query_completed(SteamUGCQueryCompleted_t* result, bool io_failure);
 
 public:
 
@@ -98,7 +109,25 @@ public:
 
     ~steam_helper() noexcept;
 
+    void get_query_results(std::vector<std::string> &itemInfos) noexcept;
+
     void create_workshop_item(create_item_continuation&& continuation) noexcept;
+    
+    void create_user_query(UGCQueryHandle_t &query_handle, AccountID_t accountID,
+                        EUserUGCList listType, EUGCMatchingUGCType matchingType,
+                        EUserUGCListSortOrder sortOrder, uint32_t creatorAppID,
+                        uint32_t consumerAppID, uint32_t page) noexcept;
+    
+    void create_all_query(UGCQueryHandle_t &query_handle,
+                        EUGCQuery listType, EUGCMatchingUGCType matchingType,
+                        AppId_t creatorAppID, AppId_t consumerAppID,
+                        uint32_t page) noexcept;
+
+    [[nodiscard]] bool set_search_text(const UGCQueryHandle_t query_handle, const char* searchText) noexcept;
+
+    void send_query_request(UGCQueryHandle_t query_handle, submit_query_continuation&& continuation) noexcept;
+
+    void release_query_handle(UGCQueryHandle_t query_handle) noexcept;
 
     [[nodiscard]] std::optional<UGCUpdateHandle_t> start_workshop_item_update(const PublishedFileId_t item_id) noexcept;
     

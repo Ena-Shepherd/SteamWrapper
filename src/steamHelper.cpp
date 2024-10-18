@@ -342,6 +342,120 @@ void steam_helper::on_create_item(CreateItemResult_t* result, bool io_failure) {
     return "unknown EResult value";
 }
 
+// UGC Query Functions
+//-----------------------------------------------------------------------------------------------------
+
+void steam_helper::get_query_results(std::vector<std::string> &itemInfos) noexcept {
+    for (const auto& result : _query_results) {
+        itemInfos.push_back(result.item_details.m_rgchTitle);
+        itemInfos.push_back(result.item_details.m_rgchDescription);
+        itemInfos.push_back(result.image_url);
+    }
+}
+
+void steam_helper::create_user_query(UGCQueryHandle_t &query_handle, AccountID_t accountID, EUserUGCList listType, EUGCMatchingUGCType matchingType, EUserUGCListSortOrder sortOrder, uint32_t creatorAppID, uint32_t consumerAppID, uint32_t page) noexcept { 
+    
+    query_handle = SteamUGC()->CreateQueryUserUGCRequest(accountID, listType, matchingType, sortOrder, creatorAppID, consumerAppID, page);
+    if ( query_handle == k_UGCQueryHandleInvalid) {
+        log("Steam") << "Failed to create query handle\n";
+        return;
+    }
+    log("Steam") << "Query handle created successfully\n";
+
+}
+
+void steam_helper::create_all_query(UGCQueryHandle_t &query_handle, EUGCQuery listType, EUGCMatchingUGCType matchingType, AppId_t creatorAppID, AppId_t consumerAppID, uint32_t page) noexcept {
+    
+    query_handle = SteamUGC()->CreateQueryAllUGCRequest(listType, matchingType, creatorAppID, consumerAppID, page);
+    if ( query_handle == k_UGCQueryHandleInvalid) {
+        log("Steam") << "Failed to create query handle\n";
+        return;
+    }
+
+}
+
+bool steam_helper::set_search_text(const UGCQueryHandle_t query_handle, const char* searchText) noexcept {
+    if (!SteamUGC()->SetSearchText(query_handle, searchText)) {
+        log("Steam") << "Failed to set search text\n";
+        log("Steam") << "Available only for \"All\" request type\n";
+        return false;
+    }
+    log("Steam") << "Search text set successfully\n";
+    return true;
+}
+
+void steam_helper::on_query_completed(SteamUGCQueryCompleted_t* result, bool io_failure)
+{
+    const auto guard = scope_guard{[this] { remove_pending_operation(); }};
+
+    if(io_failure)
+    {
+        log("Steam") << "Error querying items. IO failure.\n";
+        return;
+    }
+
+    if(const EResult rc = result->m_eResult; rc != EResult::k_EResultOK)
+    {
+        log("Steam") << "Error querying items. Error code '"
+                        << static_cast<int>(rc) << "' ("
+                        << result_to_string(rc) << ")\n";
+
+        return;
+    }
+
+    const auto num_items = result->m_unNumResultsReturned;
+    log("Steam") << "Query completed. Found " << num_items << " items\n";
+
+    for(uint32_t i = 0; i < num_items; ++i)
+    {
+        SteamUGCDetails_t item_details;
+        if(!SteamUGC()->GetQueryUGCResult(result->m_handle, i, &item_details))
+        {
+            log("Steam") << "Failed to get item details for item " << i << "\n";
+            continue;
+        }
+
+        // log("Steam") << "Item is titled '" << item_details.m_rgchTitle << "'\n";
+        // log("Steam") << "Item has description '" << item_details.m_rgchDescription << "'\n";
+        
+        uint32_t image_size = 512; // 512 is the maximum size for the image URL
+        char* image_url = new char[image_size];
+
+        if (!SteamUGC()->GetQueryUGCPreviewURL(result->m_handle, i, image_url, image_size)) {
+            log("Steam") << "Failed to get image URL for item " << i << "\n";
+            continue;
+        }
+        _query_results.push_back({item_details, image_url});
+    }
+
+    assert(_submit_query_continuation);
+    _submit_query_continuation(result->m_handle);
+
+    _submit_query_continuation = submit_query_continuation{};
+
+    SteamUGC()->ReleaseQueryUGCRequest(result->m_handle);
+}
+
+void steam_helper::send_query_request(UGCQueryHandle_t query_handle, submit_query_continuation&& continuation) noexcept {
+    log("Steam") << "Sending workshop item query request...\n";
+    add_pending_operation();
+
+    const SteamAPICall_t api_call =
+        SteamUGC()->SendQueryUGCRequest(query_handle);
+
+    std::vector<query_result_t> query_results;
+    _submit_query_result.Set(api_call, this, &steam_helper::on_query_completed);
+    _submit_query_continuation = std::move(continuation);
+}
+
+void steam_helper::release_query_handle(UGCQueryHandle_t query_handle) noexcept {
+    SteamUGC()->ReleaseQueryUGCRequest(query_handle);
+    log("Steam") << "Query handle released\n";
+}
+
+// UGC Upload Functions
+//-----------------------------------------------------------------------------------------------------
+
 void steam_helper::on_submit_item(SubmitItemUpdateResult_t* result, bool io_failure)
 {
     const auto guard = scope_guard{[this] { remove_pending_operation(); }};
