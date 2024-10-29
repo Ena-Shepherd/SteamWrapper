@@ -34,10 +34,22 @@ namespace easySteam {
                         AppId_t creatorAppID, AppId_t consumerAppID, uint32_t page
     );
 
+    // User query specifiers
+    bool setCloudFilenameFilter(const char* cloudFileName);
+
+    // All query specifiers
+    bool setMatchAnyTag(const bool matchAnyTag);
     bool setSearchText(const char* searchText);
+    bool setRankedByTrendDays(const uint32 nbDays);
+
+    bool addRequiredTag(const char* tagName);
+    bool addExcludedTag(const char* tagName);
+    bool returnLongDescription(const bool enabled);
+    bool returnTotalOnly(const bool enabled);
+    bool allowCachedResponse(const uint32 maxAgeSeconds);
     
     // Also processes the results and cleaning
-    std::vector<WorkshopItem_t> sendQuery();
+    void sendQuery(std::vector<SteamUGCDetails_t> &itemListDetails, std::vector<char*> &imageListURL);
 
     void updateItem(uint64_t app_id, uint64_t item_id);
     void initUpdateHandle();

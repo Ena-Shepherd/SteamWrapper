@@ -345,11 +345,10 @@ void steam_helper::on_create_item(CreateItemResult_t* result, bool io_failure) {
 // UGC Query Functions
 //-----------------------------------------------------------------------------------------------------
 
-void steam_helper::get_query_results(std::vector<std::string> &itemInfos) noexcept {
+void steam_helper::get_query_results(std::vector<SteamUGCDetails_t> &itemDetails, std::vector<char*> &previewImageURL) noexcept {
     for (const auto& result : _query_results) {
-        itemInfos.push_back(result.item_details.m_rgchTitle);
-        itemInfos.push_back(result.item_details.m_rgchDescription);
-        itemInfos.push_back(result.image_url);
+        itemDetails.push_back(result.item_details);
+        previewImageURL.push_back(result.image_url);
     }
 }
 
@@ -361,7 +360,6 @@ void steam_helper::create_user_query(UGCQueryHandle_t &query_handle, AccountID_t
         return;
     }
     log("Steam") << "Query handle created successfully\n";
-
 }
 
 void steam_helper::create_all_query(UGCQueryHandle_t &query_handle, EUGCQuery listType, EUGCMatchingUGCType matchingType, AppId_t creatorAppID, AppId_t consumerAppID, uint32_t page) noexcept {
@@ -371,7 +369,37 @@ void steam_helper::create_all_query(UGCQueryHandle_t &query_handle, EUGCQuery li
         log("Steam") << "Failed to create query handle\n";
         return;
     }
+    log("Steam") << "Query handle created successfully\n";
+}
 
+bool steam_helper::set_cloud_filename_filter(const UGCQueryHandle_t query_handle, const char* match_cloud_name) noexcept {
+    if (!SteamUGC()->SetCloudFileNameFilter(query_handle, match_cloud_name)) {
+        log("Steam") << "Failed to set cloud name filter\n";
+        log("Steam") << "Available only for \"User\" request type\n";
+        return false;
+    }
+    log("Steam") << "Cloud name filter set successfully\n";
+    return true;
+}
+
+bool steam_helper::set_ranked_by_trend_days(const UGCQueryHandle_t query_handle, const uint32 unDays) noexcept {
+    if (!SteamUGC()->SetRankedByTrendDays(query_handle, unDays)) {
+        log("Steam") << "Failed to set ranked by trend days\n";
+        log("Steam") << "Available only for \"All\" request type\n";
+        return false;
+    }
+    log("Steam") << "Rank by trend set successfully\n";
+    return true;
+}
+
+bool steam_helper::set_match_anytag(const UGCQueryHandle_t query_handle, const bool match_any_tag) noexcept {
+    if (!SteamUGC()->SetMatchAnyTag(query_handle, match_any_tag)) {
+        log("Steam") << "Failed to set match any tag\n";
+        log("Steam") << "Available only for \"All\" request type\n";
+        return false;
+    }
+    log("Steam") << "Match any tag set successfully\n";
+    return true;
 }
 
 bool steam_helper::set_search_text(const UGCQueryHandle_t query_handle, const char* searchText) noexcept {
@@ -381,6 +409,51 @@ bool steam_helper::set_search_text(const UGCQueryHandle_t query_handle, const ch
         return false;
     }
     log("Steam") << "Search text set successfully\n";
+    return true;
+}
+
+bool steam_helper::add_required_tag(const UGCQueryHandle_t query_handle, const char* tagName) noexcept {
+    if (!SteamUGC()->AddRequiredTag(query_handle, tagName)) {
+        log("Steam") << "Failed to add a required tag\n";
+        return false;
+    }
+    log("Steam") << "Required tag added successfully\n";
+    return true;
+}
+
+bool steam_helper::add_excluded_tag(const UGCQueryHandle_t query_handle, const char* tagName) noexcept {
+    if (!SteamUGC()->AddExcludedTag(query_handle, tagName)) {
+        log("Steam") << "Failed to exclude a tag\n";
+        return false;
+    }
+    log("Steam") << "Excluded tag added successfully\n";
+    return true;
+}
+
+bool steam_helper::return_long_description(const UGCQueryHandle_t query_handle, const bool returnLongDescription) noexcept {
+    if (!SteamUGC()->SetReturnLongDescription(query_handle, returnLongDescription)) {
+        log("Steam") << "Failed to return the long description\n";
+        return false;
+    }
+    log("Steam") << "Returning long description\n";
+    return true;
+}
+
+bool steam_helper::return_total_only(const UGCQueryHandle_t query_handle, const bool returnTotalOnly) noexcept {
+    if (!SteamUGC()->SetReturnTotalOnly(query_handle, returnTotalOnly)) {
+        log("Steam") << "Failed to return the long description\n";
+        return false;
+    }
+    log("Steam") << "Returning total only\n";
+    return true;
+}
+
+bool steam_helper::allow_cached_response(const UGCQueryHandle_t query_handle, const uint32 maxAgeSeconds) noexcept {
+    if (!SteamUGC()->SetAllowCachedResponse(query_handle, maxAgeSeconds)) {
+        log("Steam") << "Failed to allow cached response\n";
+        return false;
+    }
+    log("Steam") << "Allowing cached response\n";
     return true;
 }
 

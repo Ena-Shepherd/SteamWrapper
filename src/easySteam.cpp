@@ -13,6 +13,36 @@ namespace easySteam {
         _steam_helper.reset(new steam_helper);
     }
 
+    bool setCloudFilenameFilter(const char* cloudFileName) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return false;
+        }
+        if(queryHandle == 0) {
+            std::cout << "Please create a query first.\n";
+            return false;
+        }
+
+        return _steam_helper->set_cloud_filename_filter(queryHandle, cloudFileName);
+    }
+
+    /// @brief Enforce or not if all specified tags must be matching.
+    ///
+    /// You have to add at least one tag to your request along this function
+    /// @param matchAnyTag
+    bool setMatchAnyTag(const bool matchAnyTag) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return false;
+        }
+        if(queryHandle == 0) {
+            std::cout << "Please create a query first.\n";
+            return false;
+        }
+
+        return _steam_helper->set_match_anytag(queryHandle, matchAnyTag);
+    }
+
     bool setSearchText(const char* searchText) {
         if (!_steam_helper) {
             std::cout << "Error: _steam_helper is not initialized.\n";
@@ -25,7 +55,85 @@ namespace easySteam {
 
         return _steam_helper->set_search_text(queryHandle, searchText);
     }
+
+    bool setRankedByTrendDays(const uint32 nbDays) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return false;
+        }
+        if(queryHandle == 0) {
+            std::cout << "Please create a query first.\n";
+            return false;
+        }
+
+        return _steam_helper->set_ranked_by_trend_days(queryHandle, nbDays);
+    }
     
+    bool addRequiredTag(const char* tagName) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return false;
+        }
+        if(queryHandle == 0) {
+            std::cout << "Please create a query first.\n";
+            return false;
+        }
+
+        return _steam_helper->add_required_tag(queryHandle, tagName);
+    }
+
+    bool addExcludedTag(const char* tagName) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return false;
+        }
+        if(queryHandle == 0) {
+            std::cout << "Please create a query first.\n";
+            return false;
+        }
+
+        return _steam_helper->add_excluded_tag(queryHandle, tagName);
+    }
+
+    bool returnLongDescription(const bool enabled) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return false;
+        }
+        if(queryHandle == 0) {
+            std::cout << "Please create a query first.\n";
+            return false;
+        }
+
+        return _steam_helper->return_long_description(queryHandle, enabled);
+    }
+
+    bool returnTotalOnly(const bool enabled) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return false;
+        }
+        if(queryHandle == 0) {
+            std::cout << "Please create a query first.\n";
+            return false;
+        }
+
+        return _steam_helper->return_total_only(queryHandle, enabled);
+    }
+
+    bool allowCachedResponse(const uint32 maxAgeSeconds) {
+        if (!_steam_helper) {
+            std::cout << "Error: _steam_helper is not initialized.\n";
+            return false;
+        }
+        if(queryHandle == 0) {
+            std::cout << "Please create a query first.\n";
+            return false;
+        }
+
+        return _steam_helper->allow_cached_response(queryHandle, maxAgeSeconds);
+    }
+
     /// @brief "User" query creation function.
     /// @param accountID
     /// @param listType
@@ -89,15 +197,13 @@ namespace easySteam {
 
     /// @brief Sends the query to the Steam API and returns found items information.
     /// @note This function should be called after creating a query.
-    std::vector<WorkshopItem_t> sendQuery() {
+    void sendQuery(std::vector<SteamUGCDetails_t> &itemListDetails, std::vector<char*> &imageListURL) {
 
         if (!_steam_helper) {
             std::cout << "Error: _steam_helper is not initialized.\n";
-            return {};
         }
         if(queryHandle == 0) {
             std::cout << "Please create a query first.\n";
-            return {};
         }
 
         _steam_helper->send_query_request(queryHandle,
@@ -111,19 +217,14 @@ namespace easySteam {
             std::cout << "Error processing Steam callbacks or timed out.\n";
         }
 
-        std::vector<std::string> itemList;
-        std::vector<WorkshopItem_t> workshopItems;
+        _steam_helper->get_query_results(itemListDetails, imageListURL);
 
-        _steam_helper->get_query_results(itemList);
-       
-        parseQueryResults(itemList, workshopItems);
         _steam_helper->release_query_handle(queryHandle);
 
-        if (workshopItems.empty()) {
-            std::cout << "No items found.\n";
-            return {};
-        }
-        return workshopItems;
+        // if (workshopItems.empty()) {
+        //     std::cout << "No items found.\n";
+        //     return {};
+        // }
     }
 
     void createItem(uint64_t app_id) {

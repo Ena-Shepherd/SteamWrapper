@@ -109,7 +109,7 @@ public:
 
     ~steam_helper() noexcept;
 
-    void get_query_results(std::vector<std::string> &itemInfos) noexcept;
+    void get_query_results(std::vector<SteamUGCDetails_t> &itemDetails, std::vector<char*> &previewImageURL) noexcept;
 
     void create_workshop_item(create_item_continuation&& continuation) noexcept;
     
@@ -122,8 +122,24 @@ public:
                         EUGCQuery listType, EUGCMatchingUGCType matchingType,
                         AppId_t creatorAppID, AppId_t consumerAppID,
                         uint32_t page) noexcept;
+    
+    [[nodiscard]] bool set_cloud_filename_filter(const UGCQueryHandle_t query_handle, const char* match_cloud_name) noexcept;
+
+    [[nodiscard]] bool set_match_anytag(const UGCQueryHandle_t query_handle, const bool match_any_tag) noexcept;
 
     [[nodiscard]] bool set_search_text(const UGCQueryHandle_t query_handle, const char* searchText) noexcept;
+
+    [[nodiscard]] bool set_ranked_by_trend_days(const UGCQueryHandle_t query_handle, const uint32 unDays) noexcept;
+
+    [[nodiscard]] bool add_required_tag(const UGCQueryHandle_t query_handle, const char* tagName) noexcept;
+
+    [[nodiscard]] bool add_excluded_tag(const UGCQueryHandle_t query_handle, const char* tagName) noexcept;
+
+    [[nodiscard]] bool return_long_description(const UGCQueryHandle_t query_handle, const bool returnLongDescription) noexcept;
+
+    [[nodiscard]] bool return_total_only(const UGCQueryHandle_t query_handle, const bool returnTotalOnly) noexcept;
+
+    [[nodiscard]] bool allow_cached_response(const UGCQueryHandle_t query_handle, const uint32 maxAgeSeconds) noexcept;
 
     void send_query_request(UGCQueryHandle_t query_handle, submit_query_continuation&& continuation) noexcept;
 
