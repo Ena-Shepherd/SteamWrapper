@@ -20,7 +20,9 @@ file(
   "src/*.cpp"
 )
 
-set(STEAM_FOLDER SteamAPI)
+if(NOT DEFINED STEAM_FOLDER)
+  message("\nYou have to specifiy the Steam SDK folder location : -DSTEAM_FOLDER=\"relativePath\"\n")
+endif()
 
 set(CMAKE_CURRENT_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${STEAM_FOLDER})
 
