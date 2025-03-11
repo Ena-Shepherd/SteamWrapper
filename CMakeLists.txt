@@ -21,17 +21,16 @@ file(
 )
 
 if(NOT DEFINED STEAM_FOLDER)
-  message("\nYou have to specifiy the Steam SDK folder location : -DSTEAM_FOLDER=\"relativePath\"\n")
+  message("\nYou have to specifiy the Steam SDK folder location : -DSTEAM_FOLDER=\"C:\\absolutePath\"\n")
 endif()
 
-set(CMAKE_CURRENT_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${STEAM_FOLDER})
-
 #display the include directories
-message(STATUS "Include directories: ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIB_DIR}/include")
+message(STATUS "Include directories: ${STEAM_FOLDER}/sdk/public/steam")
 #display the link directories
-message(STATUS "Link directories: ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIB_DIR}/lib")
-include_directories(${CMAKE_CURRENT_LIB_DIR}/include)
-link_directories(${CMAKE_CURRENT_LIB_DIR}/lib)
+message(STATUS "Link directories: ${STEAM_FOLDER}/sdk/redistributable_bin/win64")
+
+include_directories(${STEAM_FOLDER}/sdk/public/steam)
+link_directories(${STEAM_FOLDER}/sdk/redistributable_bin/win64)
 
 if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options(

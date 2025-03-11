@@ -45,11 +45,11 @@ easySteam::submitWorkshopItemUpdate(easySteam::itemID, "Custom changelog note");
 Asynchronous operations are now handled inside the library <br/>
 > Default timeout for operations is 4 minutes
 
-## Compiling
-- You will need `steamapi_64` added to your project
-- link against `libeasysteam.a` and `steamapi_64`, either .dll or .lib
+## Build and add to your app
+- Refer to `build.sh` if you don't know CMake
+- Link against `steam_wrapper` and `steamapi_64`, either .dll, .lib or .a
 - Done !
 
  ## Special Thanks
 <a href="https://github.com/vittorioromeo">Vittorio Romeo</a> for the base code from which i built the API. <br/>
-Go check his game <a href="https://github.com/vittorioromeo">OpenHexagon</a> on Steam, it's great, and it allowed me to run the tests for easySteam
+Go check his game <a href="https://github.com/vittorioromeo">OpenHexagon</a> on Steam, it's great, and it allowed me to run the tests for the wrapper.

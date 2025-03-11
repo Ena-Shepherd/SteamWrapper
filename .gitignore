@@ -3,3 +3,4 @@ steam_api64.dll
 *.o
 build
 SteamAPI
+*sdk*
